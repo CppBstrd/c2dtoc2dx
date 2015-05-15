@@ -245,7 +245,7 @@ class CocosLexer(object):
         return tok
 
     def t_ANY_CLASSDECL(self, tok):
-        r'@interface\s+(?P<name_of_class>\w+)'
+        r'@(interface|protocol)\s+(?P<name_of_class>\w+)'
         self._class_name = tok.lexer.lexmatch.group('name_of_class')
         self._in_class_zone = True
         self._last_symbol = '_'
@@ -259,7 +259,7 @@ class CocosLexer(object):
         return tok
 
     def t_ANY_PROPERTYPLUS(self, tok):
-        r'@(property|synthesize).*'
+        r'@\s*(property|synthesize|optional).*'
         tok.value = '//' + tok.value
         return tok
 
@@ -280,7 +280,11 @@ class CocosLexer(object):
         r'@end'
         if self._in_class_zone:
             tok.value = '}; // ' + str(self._class_name)
-            self.dec_brace()
+            try:
+                self.dec_brace()
+            except Exception:
+                #print '@end and brace counter dirty hack'
+                self._brace_counter = 0
             self._in_class_zone = False
         else:
             tok.value = '//@end'
@@ -478,6 +482,3 @@ class CocosLexer(object):
 # TODO:
 # 1. if/for/while(..) [..] issue
 # 2. [[@"some_nsstring" copy] retain]
-# +. Add retain/autorelease tools
-
-

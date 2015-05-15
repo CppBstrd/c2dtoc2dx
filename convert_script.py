@@ -7,7 +7,7 @@
 if __name__ == '__main__':
     import argparse
     import file_tools
-    from v2.to2dx import CocosLexer
+    from to2dx import CocosLexer
 #     import sys
     # pylint: disable=line-too-long
     parser = argparse.ArgumentParser(description='Cocos2d to Cocos2d-x-2 code converter.', usage='%(prog)s <path> [arguments]')
