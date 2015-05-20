@@ -32,7 +32,6 @@ if __name__ == '__main__':
         quit()
     cocos_lexer = CocosLexer()
     cocos_lexer.build()
-    cocos_lexer.set_is_header_func(file_tools.is_header)
     for fname in file_list:
         cocos_lexer.feed_from_file(fname)
         if args.debug:

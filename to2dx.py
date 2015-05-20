@@ -3,6 +3,7 @@
 
 """Cocos2d to Cocos2d-x-2 parsing tools."""
 
+import file_tools
 import help2dx
 import ply.lex as lex
 
@@ -84,10 +85,6 @@ class CocosLexer(object):
     def brace_counter(self, value):
         """Setter."""
         pass
-        
-    def set_is_header_func(self, func):
-        """Set is_header function."""
-        self._is_header_func = func
 
     ###################
     # Useful methods. #
@@ -164,8 +161,7 @@ class CocosLexer(object):
         """Feeds input data to parsing from file."""
         with open(file_name, 'r') as in_file:
             self.feed(''.join(in_file.readlines()))
-            #self.is_header = file_tools.is_header(file_name)
-            self.is_header = self._is_header_func(file_name)
+            self.is_header = file_tools.is_header(file_name)
 
     ################
     # Lexer items. #
