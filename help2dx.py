@@ -2,83 +2,39 @@
 # -*- coding: utf-8 -*-
 
 """Helpful tools for Cocos2d to Cocos2d-x translator."""
-
+from data2dx import *
 import re
 
-DICT2DX = {
-        'BOOL' : 'bool',
-        'CGPoint' : 'CCPoint',
-        'CGPointEqualToPoint' : 'CCPointEqualToPoint',
-        'CGPointZero' : 'CCPointZero',
-        'CGRect' : 'CCRect',
-        'CGRectContainsPoint' : 'CCRectContainsPoint',
-        'CGRectMake' : 'CCRectMake',
-        'CGSize' : 'CCSize',
-        'CGSizeMake' : 'CCSizeMake',
-        'FALSE' : 'false',
-        'id' : 'CCObject *',
-        'nil' : 'nullptr',
-        'NO' : 'false',
-        'NSArray' : 'CCArray',
-        'NSAssert' : 'CCAssert',
-        'NSDictionary' : 'CCDictionary',
-        'NSLog' : 'CCLog',
-        'NSMutableArray' : 'CCArray',
-        'NSMutableDictionary' : 'CCDictionary',
-        'NSNumber' : 'CCInteger',
-        'NSObject' : 'CCObject',
-        'NSSet' : 'CCSet',
-        'NSString' : 'CCString',
-        'NSUserDefaults' : 'CCUserDefault',
-        'NSValue' : 'CCValue',
-        'NULL' : 'nullptr',
-        'SEL' : '@selector',
-        'self' : 'this',
-        'super' : '__SUPER_CLASS__',
-        'TRUE' : 'true',
-        'UIEvent' : 'CCEvent',
-        'UITouch' : 'CCTouch',
-        'YES' : 'true',
-        }
+def to2dx2(some_id, prefix=False):
+    return to2dx(some_id, prefix, True)
 
-CC_MACROS = ('CCAssert', 'ccc3', 'CCLog', 'ccp', 'CCPointZero',
-             'CCPointEqualToPoint', 'CCRectContainsPoint',
-             'CCRectMake', 'CCSizeMake',)
+def to2dx3(some_id, prefix=False):
+    return to2dx(some_id, prefix, False)
 
-CREATE_METHODS = (
-                  'actions',
-                  'actionWithAction',
-                  'actionWithDuration',
-                  'actionWithTarget',
-                  'array',
-                  'arrayWithObjects',
-                  'labelWithString',
-                  'node',
-                  'numberWithInt',
-                  'spriteWithFile',
-                  'stringWithCString',
-                  'stringWithString',
-                  )
-
-# cocos2d_method_name : cocos2dx_method_name
-STATIC_METHODS = {
-                  'spriteWithSpriteFrameName' : 'createWithSpriteFrameName',
-                  'standardUserDefaults' : 'sharedUserDefault',
-                  'stringWithFormat' : 'createWithFormat',
-                  'stringWithContentsOfFile' : 'createWithContentsOfFile',
-                  'valueWithCGPoint' : '<CCPoint>valueWithValue',
-                  }
-
-IGNORED_HEADERS = (
-                   'Foundation/Foundation.h',
-                   )
-
-def to2dx(some_id, prefix=False):
+def to2dx(some_id, prefix=False, use_v2=False):
     """Returns correspondence name if possible."""
-    ans = DICT2DX.get(some_id, some_id)
-    if prefix and ans[0:2].upper() == 'CC' and ans not in CC_MACROS:
-        ans = 'cocos2d::' + ans
+    ans = OBJC_TO_CPP.get(some_id, some_id)
+    starts_with_cc = ans[0:2].upper() == 'CC'
+    if use_v2:
+        if prefix and starts_with_cc and ans not in CC_MACROS:
+            ans = 'cocos2d::' + ans
+    else:
+        ans = getV3Name(ans)
+        if prefix and starts_with_cc:
+            ans = 'cocos2d::' + ans
     return ans
+    
+def getV3Name(some_id):
+    """Returns Cocos2d-x-v-3.* name."""
+    if some_id in DEPRECATED_V3:
+        return some_id
+    elif some_id in V2_TO_V3:
+        return V2_TO_V3[some_id]
+    elif some_id.startswith('CC'):
+        return some_id[2:]
+    else:
+        return some_id
+    
 
 def method2dx(method_name, last_word):
     """Returns correspondence method with prefix."""

@@ -62,6 +62,12 @@ class CocosLexer(object):
         self._lexer = None
         self._stack = BracketsStack()
         self.refresh()  # remaining flags are there
+        
+    def init_version(self, v2_flag):
+        if v2_flag:
+            self.to2dx_func = help2dx.to2dx2
+        else:
+            self.to2dx_func = help2dx.to2dx3
 
     ###############
     # Properties. #
@@ -353,7 +359,7 @@ class CocosLexer(object):
 
     def t_methoddecl_PARAMCLASS(self, tok):
         r'\(\s*(?P<name>[a-zA-Z_]\w*)(?P<ast>\s*\*)*?\s*\)'
-        name = help2dx.to2dx(tok.lexer.lexmatch.group('name'), self.is_header)
+        name = self.to2dx_func(tok.lexer.lexmatch.group('name'), self.is_header)
         ast = tok.lexer.lexmatch.group('ast')
         tok.value = ('static '
                      if self._static_method and self.is_header else '') \
@@ -362,7 +368,7 @@ class CocosLexer(object):
 
     def t_INITIAL_PARAMCLASS(self, tok):  # type casting patch
         r'\(\s*(?P<name>[a-zA-Z_]\w*)(?P<ast>\s*\*)*?\s*\)'
-        name = help2dx.to2dx(tok.lexer.lexmatch.group('name'), self.is_header)
+        name = self.to2dx_func(tok.lexer.lexmatch.group('name'), self.is_header)
         ast = tok.lexer.lexmatch.group('ast')
         tok.value = '(' + name + ' ' + \
             (str(ast).replace(" ", "") if ast else '') + ')'
@@ -413,16 +419,16 @@ class CocosLexer(object):
         if self._stack.objc_call():
             # object which is got message
             if not self._stack.object_parsed():
-                tok.value = help2dx.to2dx(tok.value, prefix=False)
+                tok.value = self.to2dx_func(tok.value, prefix=False)
                 self._stack.set_object_parsed()
             # no args message
             elif not self._stack.header_parsed() and self.message_ability():
                 tok.value = help2dx.method2dx(tok.value, self._last_word)
                 self._stack.set_header_parsed()
             else:  # just a parameter name or part of object
-                tok.value = help2dx.to2dx(tok.value, prefix=False)
+                tok.value = self.to2dx_func(tok.value, prefix=False)
         else:
-            tok.value = help2dx.to2dx(tok.value, prefix=self.is_header)
+            tok.value = self.to2dx_func(tok.value, prefix=self.is_header)
         self._last_symbol = '_'
         self._last_word = initial if initial != 'super' else 'Super'
         return tok

@@ -20,6 +20,7 @@ if __name__ == '__main__':
                         help='Prints interpreter result in console for the 1st file only and interrupts.')
     parser.add_argument('--backup', '-b', action='store_true', default=False, help='Store old code in *.bak files.')
     parser.add_argument('--subfolders', '-s', action='store_true', default=False, help='Do options in subfolders.')
+    parser.add_argument('--second', '-2', action='store_true', default=False, help='Convert to Cocos2d-x-2.*.')
     args = parser.parse_args()
     if args.rollback:
         file_tools.rollback(args.path[0], args.subfolders)
@@ -32,6 +33,7 @@ if __name__ == '__main__':
         quit()
     cocos_lexer = CocosLexer()
     cocos_lexer.build()
+    cocos_lexer.init_version(args.second)
     for fname in file_list:
         cocos_lexer.feed_from_file(fname)
         if args.debug:
